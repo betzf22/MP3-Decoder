@@ -13,7 +13,7 @@ typedef enum {
   kMPEGAudioVersionReserved,
   kMPEGAudioVersionID2,
   kMPEGAudioVersionID1
-} MPEGAudioVersionID
+} MPEGAudioVersionID;
 
 typedef enum {
   kMPEGLayerReserved,

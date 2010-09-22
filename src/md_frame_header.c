@@ -106,13 +106,13 @@ MPEGLayer md_frameheader_layer(md_frameheader_ref header)
   return header->layer;
 }
 
-uint16_t md_frameheader_bitrate(md_frameheader_ref header)
+int32_t md_frameheader_bitrate(md_frameheader_ref header)
 {
   assert(NULL != header);
   return header->bitrate;
 }
 
-uint16_t md_frameheader_samplingfrequency(md_frameheader_ref header)
+int32_t md_frameheader_samplingfrequency(md_frameheader_ref header)
 {
   assert(NULL != header);
   return header->sampling_frequency;
