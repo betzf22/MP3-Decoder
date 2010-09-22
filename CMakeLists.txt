@@ -6,3 +6,4 @@ project (mp3-decoder)
 SET(CMAKE_C_FLAGS "-std=c99")
 
 add_subdirectory(src)
+add_subdirectory(test)

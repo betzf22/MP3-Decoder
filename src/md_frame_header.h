@@ -29,6 +29,10 @@ typedef enum {
   kMPEGChannelModeMono
 } MPEGChannelMode;
 
+extern const char* MPEGAudioVersionNames[4];
+extern const char* MPEGLayerNames[4];
+extern const char* MPEGChannelModeNames[4];
+
 typedef struct md_frameheader_s* md_frameheader_ref;
 
 ////////////////////
@@ -50,5 +54,6 @@ int32_t md_frameheader_bitrate(md_frameheader_ref header);
 int32_t md_frameheader_samplingfrequency(md_frameheader_ref header);
 MPEGChannelMode md_frameheader_channelmode(md_frameheader_ref header);
 bool md_frameheader_hascrc(md_frameheader_ref header);
+char* md_frameheader_description(md_frameheader_ref header);
 
 #endif // MD_FRAME_HEADER_H_

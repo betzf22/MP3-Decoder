@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "md_frame_header.h"
+#include "utility/md_string.h"
 
 ///////////////////////
 // Private Interface //
@@ -20,6 +21,7 @@ struct md_frameheader_s {
 
 static int32_t bitrate_index_table[5][16];
 static int32_t sampling_rate_frequency_index_table[3][4];
+
 int32_t helper_lookup_bitrate_index_in_table(md_frameheader_ref header,
 					     int32_t bitrate_index);
 int32_t helper_lookup_sampling_frequency(md_frameheader_ref header,
@@ -129,6 +131,27 @@ bool md_frameheader_hascrc(md_frameheader_ref header) {
   return header->has_crc;
 }
 
+char* md_frameheader_description(md_frameheader_ref header) {
+  md_string_ref s = md_string_alloc();
+  
+  md_string_appendcstring(s, "{\n");
+  
+  md_string_appendformat(s, "MPEG Version: %s,\n", MPEGAudioVersionNames[header->audio_version]);
+  md_string_appendformat(s, "MPEG Layer: %s,\n", MPEGLayerNames[header->layer]);
+  md_string_appendformat(s, "Bitrate: %i,\n", header->bitrate);
+  md_string_appendformat(s, "Sampling Frequency: %i,\n", header->sampling_frequency);
+  md_string_appendformat(s, "Channel Mode: %s,\n", MPEGChannelModeNames[header->channel_mode]);
+  md_string_appendformat(s, "Has CRC: %s,\n", header->has_crc? "YES" : "NO");
+  md_string_appendformat(s, "Has Padding: %s,\n", header->has_padding? "YES" : "NO");
+  
+  md_string_appendcstring(s, "}\n");
+  
+  char* result = md_string_cstring(s);
+  md_string_destroy(s);
+  
+  return result;
+}
+
 ////////////////////////////
 // Private Implementation //
 ////////////////////////////
@@ -184,6 +207,31 @@ int32_t helper_lookup_sampling_frequency(md_frameheader_ref header,
     return -1;
   }
 }
+
+//////////////////////
+// Public Constants //
+//////////////////////
+
+const char* MPEGAudioVersionNames[4] = {
+  "kMPEGAudioVersionID2_5",
+  "kMPEGAudioVersionReserved",
+  "kMPEGAudioVersionID2",
+  "kMPEGAudioVersionID1"
+};
+
+const char* MPEGLayerNames[4] = {
+  "kMPEGLayerReserved",
+  "kMPEGLayerLayer3",
+  "kMPEGLayerLayer2",
+  "kMPEGLayerLayer1"
+};
+
+const char* MPEGChannelModeNames[4] = {
+  "kMPEGChannelModeStereo",
+  "kMPEGChannelModeJointStereo",
+  "kMPEGChannelModeDualMono",
+  "kMPEGChannelModeMono"
+};
 
 ///////////////////////
 // Private Constants //
