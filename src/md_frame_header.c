@@ -15,13 +15,15 @@ struct md_frameheader_s {
   int32_t sampling_frequency;
   MPEGChannelMode channel_mode;
   bool has_crc;
+  bool has_padding;
 };
 
 static int32_t bitrate_index_table[5][16];
-static int32_t sampling_rate_frequency_index_table[4][3];
+static int32_t sampling_rate_frequency_index_table[3][4];
 int32_t helper_lookup_bitrate_index_in_table(md_frameheader_ref header,
 					     int32_t bitrate_index);
-
+int32_t helper_lookup_sampling_frequency(md_frameheader_ref header,
+					 int32_t bitrate_index);
 ///////////////////////////
 // Public Implementation //
 ///////////////////////////
@@ -39,7 +41,9 @@ void md_frameheader_destroy(md_frameheader_ref header)
 
 // Initialize Header
 // returns number of bytes read. 0 if failed.
-uint64_t md_frameheader_initwithbytes(md_frameheader_ref header, uint8_t* bytes, uint64_t num_bytes)
+uint64_t md_frameheader_initwithbytes(md_frameheader_ref header,
+				      uint8_t* bytes,
+				      uint64_t num_bytes)
 {
   assert(NULL != header);
   assert(NULL != bytes);
@@ -73,8 +77,20 @@ uint64_t md_frameheader_initwithbytes(md_frameheader_ref header, uint8_t* bytes,
   header->has_crc = (second_byte & 1) == 1;
   
   // grab bitrate
-  uint16_t bitrate_index = (third_byte & 240) >> 4;
-  header->bitrate = helper_lookup_bitrate_index_in_table(header, bitrate_index);
+  int32_t bitrate_index = (int32_t)((third_byte & 240) >> 4);
+  header->bitrate = helper_lookup_bitrate_index_in_table(header,
+							 bitrate_index);
+  
+  int32_t sampling_frequency_index = (int32_t)((third_byte & 12) >> 2);
+  header->sampling_frequency =
+    helper_lookup_sampling_frequency(header,
+				     sampling_frequency_index);
+  
+  header->has_padding = ((third_byte & 2) >> 1);
+  
+  header->channel_mode = (int32_t)((fourth_byte & 192) >> 6);
+  
+  return 4;
 }
 
 // Get Info From Header
@@ -118,6 +134,11 @@ bool md_frameheader_hascrc(md_frameheader_ref header) {
 ////////////////////////////
 
 int32_t helper_lookup_bitrate_index_in_table(md_frameheader_ref header, int32_t bitrate_index) {
+  
+  if (bitrate_index < 0 || bitrate_index > 16) {
+    return -1;
+  }
+  
   switch(header->audio_version) {
   case kMPEGAudioVersionID1:
     switch(header->layer) {
@@ -145,6 +166,25 @@ int32_t helper_lookup_bitrate_index_in_table(md_frameheader_ref header, int32_t 
   }
 }
 
+int32_t helper_lookup_sampling_frequency(md_frameheader_ref header,
+					 int32_t bitrate_index)
+{
+  if (bitrate_index < 0 || bitrate_index > 4) {
+    return -1;
+  }
+  
+  switch(header->audio_version) {
+  case kMPEGAudioVersionID1:
+    return sampling_rate_frequency_index_table[0][bitrate_index];
+  case kMPEGAudioVersionID2:
+    return sampling_rate_frequency_index_table[1][bitrate_index];
+  case kMPEGAudioVersionID2_5:
+    return sampling_rate_frequency_index_table[2][bitrate_index];
+  default:
+    return -1;
+  }
+}
+
 ///////////////////////
 // Private Constants //
 ///////////////////////
@@ -157,9 +197,8 @@ static int32_t bitrate_index_table[5][16] = {
   {-1,8,16,24,32,40,48,56,64,80,96,112,128,144,160,-1}
 };
 
-static int32_t sampling_rate_frequency_index_table[4][3] = {
-  {44100,22050,11025},
-  {48000,24000,12000},
-  {32000,16000,8000},
-  {-1,-1,-1}
+static int32_t sampling_rate_frequency_index_table[3][4] = {
+  {44100,48000,32000,-1},
+  {22050,24000,16000,-1},
+  {11025,12000,8000,-1}
 };
