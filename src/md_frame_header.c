@@ -5,6 +5,15 @@
 #include "md_frame_header.h"
 #include "utility/md_string.h"
 
+#define ENABLE_LOG 0
+
+#if ENABLE_LOG
+  #include <stdio.h>
+#define LOG(x, ...) fprintf(stderr, x "\n", ## __VA_ARGS__)
+#else
+#define LOG(x, ...)
+#endif
+
 ///////////////////////
 // Private Interface //
 ///////////////////////
@@ -51,20 +60,35 @@ uint64_t md_frameheader_initwithbytes(md_frameheader_ref header,
   assert(NULL != bytes);
   assert(num_bytes >= 4);
   
-  uint8_t first_byte = bytes[3];
-  uint8_t second_byte = bytes[2];
-  uint8_t third_byte = bytes[1];
-  uint8_t fourth_byte = bytes[0];
+  // look for sync header
+  uint64_t offset;
+  for(offset = 0; offset < num_bytes-1;offset++) {
+    if ((bytes[offset] == 0xFF) && (bytes[offset+1] & 0xE0) == 0xE0) {
+      LOG("Found Offset! Offset: %i; Offset Value: %i; Offset Value + 1: %i;", (int)offset, bytes[offset], bytes[offset+1]);
+      break;
+    }
+  }
   
-  // check for sync byte
-  if (first_byte != 255 && ((second_byte & 224) >> 5) != 7) {
+  if (offset == num_bytes - 3) {
+    LOG("Error! Failed to find frame sync!");
     return 0;
   }
+  
+  uint8_t first_byte = bytes[offset];
+  uint8_t second_byte = bytes[offset+1];
+  uint8_t third_byte = bytes[offset+2];
+  uint8_t fourth_byte = bytes[offset+3];
+  
+  LOG("First Byte: %x", first_byte);
+  LOG("Second Byte: %x", second_byte);
+  LOG("Third Byte: %x", third_byte);
+  LOG("Fourth Byte: %x", fourth_byte);
   
   // get audio version id
   header->audio_version = (second_byte & 24) >> 3;
   // return if we have reserved
   if (header->audio_version == kMPEGAudioVersionReserved) {
+    LOG("Invalid MPEG Header! kMPEGAudioVersionReserved is an invalid audio version.");
     return 0;
   }
   
@@ -72,6 +96,7 @@ uint64_t md_frameheader_initwithbytes(md_frameheader_ref header,
   header->layer = (second_byte & 6) >> 1;
   // return if we have reserved layer
   if (header->layer == kMPEGLayerReserved) {
+    LOG("Invalid MPEG Header! kMPEGAudioLayerReserved is an invalid audio layer.");
     return 0;
   }
   
@@ -136,13 +161,13 @@ char* md_frameheader_description(md_frameheader_ref header) {
   
   md_string_appendcstring(s, "{\n");
   
-  md_string_appendformat(s, "MPEG Version: %s,\n", MPEGAudioVersionNames[header->audio_version]);
-  md_string_appendformat(s, "MPEG Layer: %s,\n", MPEGLayerNames[header->layer]);
-  md_string_appendformat(s, "Bitrate: %i,\n", header->bitrate);
-  md_string_appendformat(s, "Sampling Frequency: %i,\n", header->sampling_frequency);
-  md_string_appendformat(s, "Channel Mode: %s,\n", MPEGChannelModeNames[header->channel_mode]);
-  md_string_appendformat(s, "Has CRC: %s,\n", header->has_crc? "YES" : "NO");
-  md_string_appendformat(s, "Has Padding: %s,\n", header->has_padding? "YES" : "NO");
+  md_string_appendformat(s, "\tMPEG Version: %s,\n", MPEGAudioVersionNames[header->audio_version]);
+  md_string_appendformat(s, "\tMPEG Layer: %s,\n", MPEGLayerNames[header->layer]);
+  md_string_appendformat(s, "\tBitrate: %i,\n", header->bitrate);
+  md_string_appendformat(s, "\tSampling Frequency: %i,\n", header->sampling_frequency);
+  md_string_appendformat(s, "\tChannel Mode: %s,\n", MPEGChannelModeNames[header->channel_mode]);
+  md_string_appendformat(s, "\tHas CRC: %s,\n", header->has_crc? "YES" : "NO");
+  md_string_appendformat(s, "\tHas Padding: %s,\n", header->has_padding? "YES" : "NO");
   
   md_string_appendcstring(s, "}\n");
   

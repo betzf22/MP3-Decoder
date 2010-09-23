@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
   
   bool result = read_file(TARGET_FILE, &data, &data_count);
   if (!result) {
+    fprintf(stderr, "Failed to read target file!\n");
     return -1;
   }
   
@@ -27,7 +28,7 @@ int main(int argc, char* argv[])
   md_frameheader_initwithbytes(header, data, data_count);
   
   char* description = md_frameheader_description(header);
-  printf("%s\n", description);
+  fprintf(stderr, "%s\n", description);
   free(description);
   
   md_frameheader_destroy(header);
