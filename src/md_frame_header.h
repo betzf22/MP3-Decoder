@@ -9,17 +9,17 @@
 ///////////////////////////////////
 
 typedef enum {
-  kMPEGAudioVersionID2_5,
+  kMPEGAudioVersion2_5,
   kMPEGAudioVersionReserved,
-  kMPEGAudioVersionID2,
-  kMPEGAudioVersionID1
-} MPEGAudioVersionID;
+  kMPEGAudioVersion2,
+  kMPEGAudioVersion1
+} MPEGAudioVersion;
 
 typedef enum {
   kMPEGLayerReserved,
-  kMPEGLayerLayer3,
-  kMPEGLayerLayer2,
-  kMPEGLayerLayer1
+  kMPEGLayer3,
+  kMPEGLayer2,
+  kMPEGLayer1
 } MPEGLayer;
 
 typedef enum {
@@ -48,7 +48,7 @@ void md_frameheader_destroy(md_frameheader_ref header);
 uint64_t md_frameheader_initwithbytes(md_frameheader_ref header, uint8_t* bytes, uint64_t num_bytes);
 
 // Get Info From Header
-MPEGAudioVersionID md_frameheader_versionid(md_frameheader_ref header);
+MPEGAudioVersion md_frameheader_versionid(md_frameheader_ref header);
 MPEGLayer md_frameheader_layer(md_frameheader_ref header);
 int32_t md_frameheader_bitrate(md_frameheader_ref header);
 int32_t md_frameheader_samplingfrequency(md_frameheader_ref header);

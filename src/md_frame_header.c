@@ -19,7 +19,7 @@
 ///////////////////////
 
 struct md_frameheader_s {
-  MPEGAudioVersionID audio_version;
+  MPEGAudioVersion audio_version;
   MPEGLayer layer;
   int32_t bitrate;
   int32_t sampling_frequency;
@@ -121,7 +121,7 @@ uint64_t md_frameheader_initwithbytes(md_frameheader_ref header,
 }
 
 // Get Info From Header
-MPEGAudioVersionID md_frameheader_versionid(md_frameheader_ref header)
+MPEGAudioVersion md_frameheader_versionid(md_frameheader_ref header)
 {
   assert(NULL != header);
   return header->audio_version;
@@ -188,25 +188,25 @@ int32_t helper_lookup_bitrate_index_in_table(md_frameheader_ref header, int32_t 
   }
   
   switch(header->audio_version) {
-  case kMPEGAudioVersionID1:
+  case kMPEGAudioVersion1:
     switch(header->layer) {
-    case kMPEGLayerLayer1:
+    case kMPEGLayer1:
       return bitrate_index_table[0][bitrate_index];
-    case kMPEGLayerLayer2:
+    case kMPEGLayer2:
       return bitrate_index_table[1][bitrate_index];
-    case kMPEGLayerLayer3:
+    case kMPEGLayer3:
       return bitrate_index_table[2][bitrate_index];
     default:
       return -1;
     }
-  case kMPEGAudioVersionID2:
-  case kMPEGAudioVersionID2_5:
+  case kMPEGAudioVersion2:
+  case kMPEGAudioVersion2_5:
     switch(header->layer) {
-    case kMPEGLayerLayer1:
+    case kMPEGLayer1:
       return bitrate_index_table[3][bitrate_index];
       break;
-    case kMPEGLayerLayer2:
-    case kMPEGLayerLayer3:
+    case kMPEGLayer2:
+    case kMPEGLayer3:
       return bitrate_index_table[4][bitrate_index];
     default:
       return -1;
@@ -222,11 +222,11 @@ int32_t helper_lookup_sampling_frequency(md_frameheader_ref header,
   }
   
   switch(header->audio_version) {
-  case kMPEGAudioVersionID1:
+  case kMPEGAudioVersion1:
     return sampling_rate_frequency_index_table[0][bitrate_index];
-  case kMPEGAudioVersionID2:
+  case kMPEGAudioVersion2:
     return sampling_rate_frequency_index_table[1][bitrate_index];
-  case kMPEGAudioVersionID2_5:
+  case kMPEGAudioVersion2_5:
     return sampling_rate_frequency_index_table[2][bitrate_index];
   default:
     return -1;
@@ -238,17 +238,17 @@ int32_t helper_lookup_sampling_frequency(md_frameheader_ref header,
 //////////////////////
 
 const char* MPEGAudioVersionNames[4] = {
-  "kMPEGAudioVersionID2_5",
+  "kMPEGAudioVersion2_5",
   "kMPEGAudioVersionReserved",
-  "kMPEGAudioVersionID2",
-  "kMPEGAudioVersionID1"
+  "kMPEGAudioVersion2",
+  "kMPEGAudioVersion1"
 };
 
 const char* MPEGLayerNames[4] = {
   "kMPEGLayerReserved",
-  "kMPEGLayerLayer3",
-  "kMPEGLayerLayer2",
-  "kMPEGLayerLayer1"
+  "kMPEGLayer3",
+  "kMPEGLayer2",
+  "kMPEGLayer1"
 };
 
 const char* MPEGChannelModeNames[4] = {
