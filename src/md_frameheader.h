@@ -1,5 +1,5 @@
-#ifndef MD_FRAME_HEADER_H_
-#define MD_FRAME_HEADER_H_
+#ifndef MD_FRAMEHEADER_H_
+#define MD_FRAMEHEADER_H_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -56,4 +56,4 @@ MPEGChannelMode md_frameheader_channelmode(md_frameheader_ref header);
 bool md_frameheader_hascrc(md_frameheader_ref header);
 char* md_frameheader_description(md_frameheader_ref header);
 
-#endif // MD_FRAME_HEADER_H_
+#endif // MD_FRAMEHEADER_H_
